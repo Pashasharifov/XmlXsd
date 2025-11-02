@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessXlsxJob;
 use App\Models\Upload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Event\Code\Throwable;
 
 class UploadController extends Controller
 {
@@ -17,9 +19,8 @@ class UploadController extends Controller
         $request->validate([
             'file' => 'required|file|mimes:xlsx|max:51200',
         ]);
-
         $file = $request->file('file');
-        $filename = time().'_'.$file->getClientOriginalName();
+        $filename = time() . '_' .$file->getClientOriginalName();
         $filepath = $file->storeAs('uploads', $filename);
 
         $upload = Upload::create([
@@ -28,7 +29,7 @@ class UploadController extends Controller
             'filepath' => $filepath,
             'status' => 'pending',
         ]);
-        // ProcessXlsxJob::dispatch($upload);
+        ProcessXlsxJob::dispatch($upload);
         return view('upload', ['success' => 'File uploaded successfully.', 'uploads' => Upload::all()]);
     }
     public function download($id)
@@ -41,10 +42,15 @@ class UploadController extends Controller
 
         $xmlPath = 'processed/' . pathinfo($upload->filename, PATHINFO_FILENAME) . '.xml';
 
-        if (!Storage::exists($xmlPath)) {
+        if (!Storage::disk('local')->exists($xmlPath)) {
+            dd('as');
             return redirect()->back()->withErrors('XML not found.');
         }
-
-        return Storage::download($xmlPath, pathinfo($upload->filename, PATHINFO_FILENAME) . '.xml');
+        
+        try {
+            return Storage::download($xmlPath, pathinfo($upload->filename, PATHINFO_FILENAME) . '.xml');
+        } catch (\Throwable $th) {
+            return redirect()->back()->withErrors($th->getMessage());
+        }
     }
 }
