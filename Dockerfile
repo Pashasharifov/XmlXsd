@@ -17,7 +17,12 @@ COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-RUN chown -R www-data:www-data /var/www
+# Laravel üçün düzgün icazələr
+RUN mkdir -p /var/www/storage /var/www/bootstrap/cache \
+    && chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage /var/www/bootstrap/cache
+
+USER www-data
 
 EXPOSE 9000
 CMD ["php-fpm"]
