@@ -52,7 +52,7 @@ class ProcessXlsxJob implements ShouldQueue
             $xsdPath = resource_path('IPD4upload.xsd');
             $isValid = $xsdValidator->validate($xmlContent, $xsdPath);
 
-            if (!$isValid)
+            if (!$isValid || $rows[0]['A'] != 'IPN')
                 throw new \Exception('XML is not like XSD.');
 
             $xmlTempPath = 'processed/' . pathinfo($this->upload->filename, PATHINFO_FILENAME) . '.xml';
