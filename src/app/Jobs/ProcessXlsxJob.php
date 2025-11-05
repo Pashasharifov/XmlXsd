@@ -46,9 +46,6 @@ class ProcessXlsxJob implements ShouldQueue
             $xmlContent = $xmlBuilder->build($rows);
             Log::info("XML are built from XLSX data.");
 
-            // $xmlPath = storage_path("app/private/xml/{$xmlTempPath}.xml");
-            // file_put_contents($xmlPath, $xmlContent);
-
             $xsdPath = resource_path('IPD4upload.xsd');
             $isValid = $xsdValidator->validate($xmlContent, $xsdPath);
 
