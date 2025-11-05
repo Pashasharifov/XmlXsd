@@ -53,4 +53,10 @@ class UploadController extends Controller
             return redirect()->back()->withErrors($th->getMessage());
         }
     }
+    public function statuses()
+    {
+        $uploads = Upload::select('id', 'status')->get();
+        return response()->json($uploads);
+    }
+
 }
